@@ -20,3 +20,15 @@ https://mdnlv.cdn.octivid.com/almdn/smil:mpegts.stream.smil/playlist.m3u8
 
 #EXTINF:-7 tvg-id="" tvg-logo="https://i.ibb.co/sw6tV5W/alhadath.jpg" ,العربية الحدث
 https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://i.ibb.co/5KW5f2K/france24ar.png" , فرنسا 24
+https://live.france24.com/hls/live/2037222/F24_AR_HI_HLS/master_5000.m3u8
+
+#EXTINF:-1 tvg-id="TRTAlArabiya.tr" tvg-logo="https://i.ibb.co/GQbQGkG/trt-ar.jpg" ,TRT العربية
+https://tv-trtarabi.medya.trt.com.tr/master.m3u8
+
+#EXTINF:-1 tvg-id="" tvg-logo="https://www.alaraby.com/themes/custom/arabytv/logo.svg" ,العربي 1
+https://live.kwikmotion.com/alaraby1live/alaraby_abr/playlist.m3u8
+
+#EXTINF:-1 tvg-id="BBCArabic.net" tvg-logo="https://i.ibb.co/yRc4rDX/bbcar.png" , بي بي سي عربي
+https://vs-cmaf-pushb-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_arabic_tv/pc_hd_abr_v2.mpd
