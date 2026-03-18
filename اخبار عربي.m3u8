@@ -1,0 +1,22 @@
+#EXTM3U
+
+#EXTINF:-1,العربية 
+https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8
+
+#EXTINF:-2, الجزيرة
+https://live-hls-web-aja-gcp.thehlive.com/AJA/index.m3u8
+
+#EXTINF:-3, الجزيرة مباشر 
+https://live-hls-web-ajm-bp.thehlive.com/AJM/index.m3u8
+
+#EXTINF:-4, RT عربي
+https://rt-arb.rttv.com/dvr/rtarab/playlist.m3u8
+
+#EXTINF:-5, sky nwes عربي
+https://live-stream.skynewsarabia.com/c-horizontal-channel/horizontal-stream/index.m3u8
+
+#EXTINF:-6, الميادين
+https://mdnlv.cdn.octivid.com/almdn/smil:mpegts.stream.smil/playlist.m3u8
+
+#EXTINF:-7, الحدث
+https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8
