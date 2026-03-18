@@ -125,6 +125,23 @@ async function loadPlaylist() {
   displayChannels(allChannels);
   selectChannel(selectedIndex);
 }
+  let wakeLock = null;
+
+async function keepScreenOn() {
+  try {
+    wakeLock = await navigator.wakeLock.request("screen");
+    console.log("Screen Wake Lock active");
+  } catch (err) {
+    console.log("Wake Lock error:", err);
+  }
+}
+
+// Re-activate if user returns to tab
+document.addEventListener("visibilitychange", () => {
+  if (wakeLock !== null && document.visibilityState === "visible") {
+    keepScreenOn();
+  }
+});
 
 // Display channels
 function displayChannels(list) {
