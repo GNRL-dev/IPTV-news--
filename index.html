@@ -1,91 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>My IPTV Player</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta charset="UTF-8">
+<title>My IPTV Player</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  background: #f5f5f5;
+}
 
-    #sidebar {
-      width: 300px;
-      background: #111;
-      color: white;
-      overflow-y: auto;
-      transition: 0.3s;
-    }
+#sidebar {
+  width: 300px;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  transition: 0.3s;
+}
 
-    #sidebar.hidden {
-      width: 0;
-      overflow: hidden;
-    }
+#sidebar.hidden {
+  width: 0;
+  overflow: hidden;
+}
 
-    #search {
-      width: 90%;
-      margin: 10px;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-    }
+#search {
+  width: 90%;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
 
-    #channels li {
-      padding: 10px;
-      cursor: pointer;
-      border-bottom: 1px solid #333;
-    }
+#channels li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
 
-    #channels li:hover {
-      background: #333;
-    }
+#channels li:hover {
+  background: #f0f0f0;
+}
 
-    #main {
-      flex: 1;
-      background: black;
-      position: relative;
-    }
+.logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
 
-    video {
-      width: 100%;
-      height: 100%;
-    }
+#main {
+  flex: 1;
+  position: relative;
+  background: black;
+}
 
-    #toggleBtn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
-      padding: 10px;
-      background: rgba(0,0,0,0.5);
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
+video {
+  width: 100%;
+  height: 100%;
+}
+
+#toggleBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  padding: 10px;
+  border: none;
+  background: rgba(255,255,255,0.7);
+  cursor: pointer;
+  border-radius: 6px;
+}
+</style>
 </head>
 
 <body>
 
 <div id="sidebar">
-  <input type="text" id="search" placeholder="Search...">
+  <input type="text" id="search" placeholder="Search channels...">
   <ul id="channels"></ul>
 </div>
 
 <div id="main">
   <button id="toggleBtn">☰</button>
-  <video id="video" controls autoplay></video>
+  <video id="video" controls autoplay muted></video>
 </div>
 
 <script>
 const playlistUrl = "https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs/heads/main/News-ar.m3u8";
 
 let allChannels = [];
+let hls;
 
 async function loadPlaylist() {
   const res = await fetch(playlistUrl);
@@ -94,9 +104,17 @@ async function loadPlaylist() {
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith("#EXTINF")) {
-      const name = lines[i].split(",")[1];
+
+      const info = lines[i];
+
+      const name = info.split(",")[1];
+
+      const logoMatch = info.match(/tvg-logo="(.*?)"/);
+      const logo = logoMatch ? logoMatch[1] : "";
+
       const stream = lines[i + 1];
-      allChannels.push({ name, stream });
+
+      allChannels.push({ name, stream, logo });
     }
   }
 
@@ -109,7 +127,18 @@ function displayChannels(list) {
 
   list.forEach(ch => {
     const li = document.createElement("li");
-    li.textContent = ch.name;
+
+    if (ch.logo) {
+      const img = document.createElement("img");
+      img.src = ch.logo;
+      img.className = "logo";
+      li.appendChild(img);
+    }
+
+    const span = document.createElement("span");
+    span.textContent = ch.name;
+
+    li.appendChild(span);
 
     li.onclick = () => playStream(ch.stream);
 
@@ -120,19 +149,26 @@ function displayChannels(list) {
 function playStream(url) {
   const video = document.getElementById("video");
 
-  if (Hls.isSupported()) {
-    const hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-  } else {
-    video.src = url;
+  if (hls) {
+    hls.destroy();
   }
 
-  // auto hide sidebar
+  if (Hls.isSupported()) {
+    hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+      video.play(); // 🔥 autoplay
+    });
+  } else {
+    video.src = url;
+    video.play();
+  }
+
   document.getElementById("sidebar").classList.add("hidden");
 }
 
-// search filter
+// search
 document.getElementById("search").addEventListener("input", function () {
   const term = this.value.toLowerCase();
   const filtered = allChannels.filter(c => c.name.toLowerCase().includes(term));
