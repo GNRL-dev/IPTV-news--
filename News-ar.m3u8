@@ -12,11 +12,11 @@ https://live-hls-web-ajm-bp.thehlive.com/AJM/index.m3u8
 #EXTINF:-4, RT عربي
 https://rt-arb.rttv.com/dvr/rtarab/playlist.m3u8
 
-#EXTINF:-5, tvg-id="SkyNwsArabia.nws" tvg-logo="https://i.ibb.co/fFyvbrC/skynewsar.png" , سكاي نيوز عربية
+#EXTINF:-5 tvg-id="SkyNwsArabia.nws" tvg-logo="https://i.ibb.co/fFyvbrC/skynewsar.png" , سكاي نيوز عربية
 https://live-stream.skynewsarabia.com/c-horizontal-channel/horizontal-stream/index.m3u8
 
-#EXTINF:-6, tvg-id="" tvg-logo="https://cdn.almayadeen.tv/images/logo/new-logo-small.png" , الميادين
+#EXTINF:-6 tvg-id="" tvg-logo="https://cdn.almayadeen.tv/images/logo/new-logo-small.png" , الميادين
 https://mdnlv.cdn.octivid.com/almdn/smil:mpegts.stream.smil/playlist.m3u8
 
-#EXTINF:-7, tvg-id="" tvg-logo="https://i.ibb.co/sw6tV5W/alhadath.jpg" ,العربية الحدث
+#EXTINF:-7 tvg-id="" tvg-logo="https://i.ibb.co/sw6tV5W/alhadath.jpg" ,العربية الحدث
 https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8
