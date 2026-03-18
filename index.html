@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Light IPTV Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
 body {
   margin:0;
@@ -106,6 +107,7 @@ video, iframe {
 const playlistUrl = "https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs/heads/main/News-ar.m3u8";
 let allChannels = [];
 let hls;
+let dashPlayer = null;
 let selectedIndex = 0;
 let wakeLock = null;
 
@@ -129,7 +131,7 @@ async function loadPlaylist() {
   selectChannel(selectedIndex);
 }
 
-// Wake lock to keep screen on
+// Keep screen on
 async function keepScreenOn() {
   try {
     wakeLock = await navigator.wakeLock.request("screen");
@@ -161,18 +163,14 @@ function displayChannels(list) {
     num.style.fontWeight = "bold";
     li.appendChild(num);
 
-    /* Logo / YouTube icon
-    const img = document.createElement("img");
-    if(isYouTube(ch.stream)){
-      img.src = "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg"; // YouTube icon
-    } else if(ch.logo){
+    // Logo (always first)
+    if(ch.logo){
+      const img = document.createElement("img");
       img.src = ch.logo;
-    } else {
-      img.src = "";
+      img.className = "logo";
+      li.appendChild(img);
     }
-    img.className = "logo";
-    li.appendChild(img);
-*/
+
     // Name
     const name = document.createElement("span");
     name.textContent = ch.name;
@@ -184,7 +182,7 @@ function displayChannels(list) {
   });
 }
 
-// Detect YouTube links
+// Detect YouTube and DASH
 function isYouTube(url) {
   return url.includes("youtube.com") || url.includes("youtu.be");
 }
@@ -195,15 +193,25 @@ function extractYouTubeID(url) {
   return match ? match[1] : null;
 }
 
-// Play a channel
+function isDASH(url){
+  return url.endsWith(".mpd");
+}
+
+// Play stream
 function playStream(url) {
   const video = document.getElementById("video");
   const iframe = document.getElementById("ytPlayer");
 
-  // Destroy previous HLS instance
-  if(hls){ hls.destroy(); hls = null; }
+  // Hide iframe by default
+  iframe.style.display = "none";
+  iframe.src = "";
 
-  // YouTube mode
+  // Destroy HLS
+  if(hls){ hls.destroy(); hls = null; }
+  // Destroy DASH
+  if(dashPlayer){ dashPlayer.reset(); dashPlayer = null; }
+
+  // YouTube
   if(isYouTube(url)){
     const videoId = extractYouTubeID(url);
     if(!videoId){
@@ -216,11 +224,16 @@ function playStream(url) {
     return;
   }
 
-  // IPTV mode
-  iframe.style.display = "none";
-  iframe.src = "";
-  video.style.display = "block";
+  // DASH
+  if(isDASH(url)){
+    video.style.display = "block";
+    dashPlayer = dashjs.MediaPlayer().create();
+    dashPlayer.initialize(video, url, true);
+    return;
+  }
 
+  // HLS
+  video.style.display = "block";
   if(Hls.isSupported()){
     hls = new Hls();
     hls.loadSource(url);
