@@ -1,1 +1,45 @@
-iptv
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My IPTV Player</title>
+</head>
+<body>
+
+<h2>My IPTV Player</h2>
+
+<input type="text" id="playlistUrl" placeholder="Enter M3U URL" size="50">
+<button onclick="loadPlaylist()">Load</button>
+
+<ul id="channels"></ul>
+
+<video id="video" width="600" controls autoplay></video>
+
+<script>
+async function loadPlaylist() {
+  const url = document.getElementById("playlistUrl").value;
+  const res = await fetch(url);
+  const text = await res.text();
+
+  const lines = text.split("\n");
+  const list = document.getElementById("channels");
+  list.innerHTML = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith("#EXTINF")) {
+      const name = lines[i].split(",")[1];
+      const stream = lines[i + 1];
+
+      const li = document.createElement("li");
+      li.textContent = name;
+      li.onclick = () => {
+        document.getElementById("video").src = stream;
+      };
+
+      list.appendChild(li);
+    }
+  }
+}
+</script>
+
+</body>
+</html>
