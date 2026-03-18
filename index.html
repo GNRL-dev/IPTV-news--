@@ -86,6 +86,22 @@ video {
   cursor:pointer;
   border-radius:6px;
 }
+
+#startOverlay {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.85);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:24px;
+  cursor:pointer;
+  z-index:999;
+}
 </style>
 </head>
 
@@ -99,6 +115,7 @@ video {
 <div id="main">
   <button id="toggleBtn">☰</button>
   <video id="video" controls autoplay muted></video>
+  <div id="startOverlay">Click anywhere to start video</div>
 </div>
 
 <script>
@@ -106,7 +123,10 @@ const playlistUrl = "https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs
 let allChannels = [];
 let hls;
 let selectedIndex = 0;
+const video = document.getElementById("video");
+const overlay = document.getElementById("startOverlay");
 
+// Load playlist
 async function loadPlaylist() {
   const res = await fetch(playlistUrl);
   const text = await res.text();
@@ -125,7 +145,7 @@ async function loadPlaylist() {
   displayChannels(allChannels);
 }
 
-// Display channels with numbers and logos
+// Display channels
 function displayChannels(list) {
   const ul = document.getElementById("channels");
   ul.innerHTML = "";
@@ -136,7 +156,7 @@ function displayChannels(list) {
 
     // Number
     const num = document.createElement("span");
-    num.textContent = (index + 1) + ".";
+    num.textContent = (index+1) + ".";
     num.style.width = "24px";
     num.style.fontWeight = "bold";
     li.appendChild(num);
@@ -161,9 +181,8 @@ function displayChannels(list) {
   });
 }
 
-// Play selected channel immediately
+// Play channel
 function playStream(url) {
-  const video = document.getElementById("video");
   if (hls) { hls.destroy(); }
 
   if (Hls.isSupported()) {
@@ -171,11 +190,11 @@ function playStream(url) {
     hls.loadSource(url);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play().catch(err => console.log("Autoplay error:", err));
+      video.play().catch(err => console.log("Autoplay blocked?", err));
     });
   } else {
     video.src = url;
-    video.play().catch(err => console.log("Autoplay error:", err));
+    video.play().catch(err => console.log("Autoplay blocked?", err));
   }
 
   document.getElementById("sidebar").classList.add("hidden");
@@ -216,7 +235,26 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// Check if autoplay is allowed
+async function checkAutoplay() {
+  try {
+    await video.play();
+    overlay.style.display = "none";
+  } catch(err) {
+    overlay.style.display = "flex";
+    console.log("Autoplay blocked, waiting for user click to start");
+  }
+}
+
+// Remove overlay on click
+overlay.onclick = () => {
+  overlay.style.display = "none";
+  video.muted = false; // enable sound
+  video.play();
+};
+
 loadPlaylist();
+checkAutoplay();
 </script>
 
 </body>
