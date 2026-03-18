@@ -1,6 +1,6 @@
 #EXTM3U
 
-#EXTINF:-1 tvg-name="العربية" tvg-logo="https://duckduckgo.com/?q=logo+arabia+tv+png&iar=images&t=brave&iai=https%3A%2F%2Fe7.pngegg.com%2Fpngimages%2F452%2F128%2Fpng-clipart-abu-dhabi-sky-news-arabia-television-others-text-logo.png"
+#EXTINF:-1 tvg-name="العربية" tvg-logo="https://duckduckgo.com/?q=logo+arabia+tv+png&iar=images&t=brave&iai=https%3A%2F%2Fe7.pngegg.com%2Fpngimages%2F452%2F128%2Fpng-clipart-abu-dhabi-sky-news-arabia-television-others-text-logo.png", العربية
 https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8
 
 #EXTINF:-2, الجزيرة
