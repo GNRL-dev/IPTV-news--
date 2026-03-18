@@ -1,22 +1,22 @@
 #EXTM3U
 
-#EXTINF:-1 tvg-name="العربية" tvg-logo="https://duckduckgo.com/?q=logo+arabia+tv+png&iar=images&t=brave&iai=https%3A%2F%2Fe7.pngegg.com%2Fpngimages%2F452%2F128%2Fpng-clipart-abu-dhabi-sky-news-arabia-television-others-text-logo.png", العربية
+#EXTINF:-1 tvg-id="AlArabiya.nws" tvg-logo="https://i.ibb.co/w7wk4p0/alarabiya.png" , العربية
 https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8
 
-#EXTINF:-2, الجزيرة
+#EXTINF:-2 tvg-id="AlJazeeraArabe.nws" tvg-logo="https://i.ibb.co/884RcMF/aljazera.png" , الجزيرة الإخبارية
 https://live-hls-web-aja-gcp.thehlive.com/AJA/index.m3u8
 
-#EXTINF:-3, الجزيرة مباشر 
+#EXTINF:-3 tvg-id="" tvg-logo="https://i1.sndcdn.com/avatars-000163249127-onw500-t240x240.jpg" ,الجزيرة مباشر 
 https://live-hls-web-ajm-bp.thehlive.com/AJM/index.m3u8
 
 #EXTINF:-4, RT عربي
 https://rt-arb.rttv.com/dvr/rtarab/playlist.m3u8
 
-#EXTINF:-5, sky nwes عربي
+#EXTINF:-5, tvg-id="SkyNwsArabia.nws" tvg-logo="https://i.ibb.co/fFyvbrC/skynewsar.png" , سكاي نيوز عربية
 https://live-stream.skynewsarabia.com/c-horizontal-channel/horizontal-stream/index.m3u8
 
-#EXTINF:-6, الميادين
+#EXTINF:-6, tvg-id="" tvg-logo="https://cdn.almayadeen.tv/images/logo/new-logo-small.png" , الميادين
 https://mdnlv.cdn.octivid.com/almdn/smil:mpegts.stream.smil/playlist.m3u8
 
-#EXTINF:-7, الحدث
+#EXTINF:-7, tvg-id="" tvg-logo="https://i.ibb.co/sw6tV5W/alhadath.jpg" ,العربية الحدث
 https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8
