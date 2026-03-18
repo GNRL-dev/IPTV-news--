@@ -2,12 +2,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>My IPTV Player</title>
+<title>Light IPTV Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
 body {
-  margin: 0;
+  margin:0;
   font-family: Arial, sans-serif;
   display: flex;
   height: 100vh;
@@ -17,8 +16,8 @@ body {
 #sidebar {
   width: 300px;
   background: #ffffff;
-  border-right: 1px solid #ddd;
-  overflow-y: auto;
+  border-right:1px solid #ddd;
+  overflow-y:auto;
   transition: 0.3s;
 }
 
@@ -31,50 +30,61 @@ body {
   width: 90%;
   margin: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border:1px solid #ccc;
   border-radius: 8px;
 }
 
+#channels {
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
 #channels li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  cursor:pointer;
+  border-bottom:1px solid #eee;
+  transition: background 0.2s;
 }
 
 #channels li:hover {
-  background: #f0f0f0;
+  background:#e0e0e0;
+}
+
+#channels li.selected {
+  background:#cce5ff;
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width:36px;
+  height:36px;
   object-fit: contain;
 }
 
 #main {
-  flex: 1;
-  position: relative;
-  background: black;
+  flex:1;
+  position:relative;
+  background:black;
 }
 
 video {
-  width: 100%;
-  height: 100%;
+  width:100%;
+  height:100%;
 }
 
 #toggleBtn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  padding: 10px;
-  border: none;
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:10;
+  padding:10px;
+  border:none;
   background: rgba(255,255,255,0.7);
-  cursor: pointer;
-  border-radius: 6px;
+  cursor:pointer;
+  border-radius:6px;
 }
 </style>
 </head>
@@ -93,9 +103,9 @@ video {
 
 <script>
 const playlistUrl = "https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs/heads/main/News-ar.m3u8";
-
 let allChannels = [];
 let hls;
+let selectedIndex = 0;
 
 async function loadPlaylist() {
   const res = await fetch(playlistUrl);
@@ -104,30 +114,35 @@ async function loadPlaylist() {
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith("#EXTINF")) {
-
       const info = lines[i];
-
       const name = info.split(",")[1];
-
       const logoMatch = info.match(/tvg-logo="(.*?)"/);
       const logo = logoMatch ? logoMatch[1] : "";
-
-      const stream = lines[i + 1];
-
+      const stream = lines[i+1];
       allChannels.push({ name, stream, logo });
     }
   }
-
   displayChannels(allChannels);
+  selectChannel(selectedIndex);
 }
 
+// Display channels
 function displayChannels(list) {
   const ul = document.getElementById("channels");
   ul.innerHTML = "";
 
-  list.forEach(ch => {
+  list.forEach((ch, index) => {
     const li = document.createElement("li");
+    li.dataset.index = index;
 
+    // Number
+    const num = document.createElement("span");
+    num.textContent = (index+1) + ".";
+    num.style.width = "24px";
+    num.style.fontWeight = "bold";
+    li.appendChild(num);
+
+    // Logo
     if (ch.logo) {
       const img = document.createElement("img");
       img.src = ch.logo;
@@ -135,50 +150,66 @@ function displayChannels(list) {
       li.appendChild(img);
     }
 
-    const span = document.createElement("span");
-    span.textContent = ch.name;
+    // Name
+    const name = document.createElement("span");
+    name.textContent = ch.name;
+    name.style.flex = "1";
+    li.appendChild(name);
 
-    li.appendChild(span);
-
-    li.onclick = () => playStream(ch.stream);
-
+    li.onclick = () => selectChannel(index);
     ul.appendChild(li);
   });
 }
 
+// Play a channel
 function playStream(url) {
   const video = document.getElementById("video");
-
-  if (hls) {
-    hls.destroy();
-  }
-
+  if (hls) { hls.destroy(); }
   if (Hls.isSupported()) {
     hls = new Hls();
     hls.loadSource(url);
     hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-      video.play(); // 🔥 autoplay
-    });
+    hls.on(Hls.Events.MANIFEST_PARSED, ()=>video.play());
   } else {
     video.src = url;
     video.play();
   }
-
-  document.getElementById("sidebar").classList.add("hidden");
 }
 
-// search
-document.getElementById("search").addEventListener("input", function () {
+// Highlight selected channel
+function selectChannel(index) {
+  selectedIndex = index;
+  const items = document.querySelectorAll("#channels li");
+  items.forEach(item => item.classList.remove("selected"));
+  const selectedItem = items[index];
+  if(selectedItem){
+    selectedItem.classList.add("selected");
+    selectedItem.scrollIntoView({behavior:"smooth", block:"center"});
+    playStream(allChannels[index].stream);
+  }
+}
+
+// Search
+document.getElementById("search").addEventListener("input", function(){
   const term = this.value.toLowerCase();
   const filtered = allChannels.filter(c => c.name.toLowerCase().includes(term));
   displayChannels(filtered);
 });
 
-// toggle sidebar
+// Toggle sidebar
 document.getElementById("toggleBtn").onclick = () => {
   document.getElementById("sidebar").classList.toggle("hidden");
 };
+
+// Arrow key navigation
+document.addEventListener("keydown", (e) => {
+  if(e.key === "ArrowDown"){
+    if(selectedIndex < allChannels.length -1) selectChannel(selectedIndex+1);
+  }
+  if(e.key === "ArrowUp"){
+    if(selectedIndex > 0) selectChannel(selectedIndex-1);
+  }
+});
 
 loadPlaylist();
 </script>
