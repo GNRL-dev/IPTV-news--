@@ -123,10 +123,9 @@ async function loadPlaylist() {
     }
   }
   displayChannels(allChannels);
-  selectChannel(selectedIndex);
 }
 
-// Display channels
+// Display channels with numbers and logos
 function displayChannels(list) {
   const ul = document.getElementById("channels");
   ul.innerHTML = "";
@@ -137,7 +136,7 @@ function displayChannels(list) {
 
     // Number
     const num = document.createElement("span");
-    num.textContent = (index+1) + ".";
+    num.textContent = (index + 1) + ".";
     num.style.width = "24px";
     num.style.fontWeight = "bold";
     li.appendChild(num);
@@ -156,24 +155,30 @@ function displayChannels(list) {
     name.style.flex = "1";
     li.appendChild(name);
 
+    // Click to play immediately
     li.onclick = () => selectChannel(index);
     ul.appendChild(li);
   });
 }
 
-// Play a channel
+// Play selected channel immediately
 function playStream(url) {
   const video = document.getElementById("video");
   if (hls) { hls.destroy(); }
+
   if (Hls.isSupported()) {
     hls = new Hls();
     hls.loadSource(url);
     hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, ()=>video.play());
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      video.play().catch(err => console.log("Autoplay error:", err));
+    });
   } else {
     video.src = url;
-    video.play();
+    video.play().catch(err => console.log("Autoplay error:", err));
   }
+
+  document.getElementById("sidebar").classList.add("hidden");
 }
 
 // Highlight selected channel
