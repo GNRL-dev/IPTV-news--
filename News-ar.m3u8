@@ -47,3 +47,6 @@ https://linear417-gb-hls1-prd-ak.cdn.skycdp.com/100e/Content/HLS_001_1080_30/Liv
 
 //#EXTINF:-1 tvg-logo="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj-If4d1PK4ebH5_onV6kAWrPcqDzYtBFRp6l_rSUMnyStLB6QDYFu-fsX5ThyphenhyphenYHGqwebPz0Lk-YbaFB4brAl-9bEXuaZK43BT1Ro3UczKEBY4sKfdRmVLT1w-09D0DDNWgJChmzhACqzkP/s1600/wataniya+2+tv+tunisie+direct+live.jpg",الوطنية 2
 //https://www.youtube.com/watch?v=EUne0-bLb48 
+
+#EXTINF:-1 tvg-id="MTVLebanon.lb@SD" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/75/Murr_tv.png" group-title="General",MTV
+https://shls-live-enc.edgenextcdn.net/out/v1/45ad6fbe1f7149ad9f05f8aefc38f6c0/index.m3u8
