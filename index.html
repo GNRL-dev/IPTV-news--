@@ -3,90 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <title>Light IPTV Player</title>
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 
 <style>
 body {
   margin:0;
-  font-family: Arial, sans-serif;
-  display: flex;
-  height: 100vh;
-  background: #f5f5f5;
+  font-family: Arial;
+  display:flex;
+  height:100vh;
 }
 
 #sidebar {
-  width: 300px;
-  background: #ffffff;
+  width:300px;
+  background:#fff;
   border-right:1px solid #ddd;
   overflow-y:auto;
-  transition: 0.3s;
-}
-
-#sidebar.hidden {
-  width: 0;
-  overflow: hidden;
 }
 
 #search {
-  width: 90%;
-  margin: 10px;
-  padding: 10px;
-  border:1px solid #ccc;
-  border-radius: 8px;
-}
-
-#channels {
-  list-style:none;
-  padding:0;
-  margin:0;
+  width:90%;
+  margin:10px;
+  padding:10px;
 }
 
 #channels li {
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
+  padding:8px;
   cursor:pointer;
-  border-bottom:1px solid #eee;
-  transition: background 0.2s;
-}
-
-#channels li:hover {
-  background:#e0e0e0;
 }
 
 #channels li.selected {
   background:#cce5ff;
 }
 
-.logo {
-  width:36px;
-  height:36px;
-  object-fit: contain;
-}
-
 #main {
   flex:1;
-  position:relative;
   background:black;
+  position:relative;
 }
 
 video, iframe {
   width:100%;
   height:100%;
-}
-
-#toggleBtn {
-  position:absolute;
-  top:10px;
-  left:10px;
-  z-index:10;
-  padding:10px;
-  border:none;
-  background: rgba(255,255,255,0.7);
-  cursor:pointer;
-  border-radius:6px;
 }
 </style>
 </head>
@@ -94,39 +53,33 @@ video, iframe {
 <body>
 
 <div id="sidebar">
-  <input type="text" id="search" placeholder="Search channels...">
+  <input id="search" placeholder="Search">
   <ul id="channels"></ul>
 </div>
 
 <div id="main">
-  <button id="toggleBtn">☰</button>
   <video id="video" controls autoplay></video>
-  <iframe id="ytPlayer" style="display:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <iframe id="ytPlayer" style="display:none;" allow="autoplay"></iframe>
 </div>
 
 <script>
 const playlistUrl = "https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs/heads/main/News-ar.m3u8";
 
 let allChannels = [];
-let hls;
-let dashPlayer = null;
+let hls, dashPlayer;
 let selectedIndex = 0;
 
-// ===== Load Playlist =====
-async function loadPlaylist() {
+// ===== LOAD PLAYLIST =====
+async function loadPlaylist(){
   const res = await fetch(playlistUrl);
   const text = await res.text();
   const lines = text.split("\n");
 
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith("#EXTINF")) {
-      const info = lines[i];
-      const name = info.split(",")[1];
-      const logoMatch = info.match(/tvg-logo="(.*?)"/);
-      const logo = logoMatch ? logoMatch[1] : "";
+  for(let i=0;i<lines.length;i++){
+    if(lines[i].startsWith("#EXTINF")){
+      const name = lines[i].split(",")[1];
       const stream = lines[i+1];
-
-      allChannels.push({ name, stream, logo });
+      allChannels.push({name, stream});
     }
   }
 
@@ -134,40 +87,21 @@ async function loadPlaylist() {
   selectChannel(0);
 }
 
-// ===== Display Channels =====
-function displayChannels(list) {
+// ===== DISPLAY =====
+function displayChannels(list){
   const ul = document.getElementById("channels");
   ul.innerHTML = "";
 
-  list.forEach((ch, index) => {
+  list.forEach((ch,i)=>{
     const li = document.createElement("li");
-    li.dataset.index = index;
-
-    const num = document.createElement("span");
-    num.textContent = (index+1) + ".";
-    num.style.width = "24px";
-    num.style.fontWeight = "bold";
-    li.appendChild(num);
-
-    if(ch.logo){
-      const img = document.createElement("img");
-      img.src = ch.logo;
-      img.className = "logo";
-      li.appendChild(img);
-    }
-
-    const name = document.createElement("span");
-    name.textContent = ch.name;
-    name.style.flex = "1";
-    li.appendChild(name);
-
-    li.onclick = () => selectChannel(index);
+    li.textContent = (i+1)+". "+ch.name;
+    li.onclick = ()=>selectChannel(i);
     ul.appendChild(li);
   });
 }
 
-// ===== Helpers =====
-function isYouTube(url) {
+// ===== HELPERS =====
+function isYouTube(url){
   return url.includes("youtube.com") || url.includes("youtu.be");
 }
 
@@ -175,125 +109,117 @@ function isDASH(url){
   return url.endsWith(".mpd");
 }
 
-function extractYouTubeID(url) {
-  let match = url.match(/v=([^&]+)/);
-  if (match) return match[1];
+function extractYouTubeID(url){
+  let m = url.match(/v=([^&]+)/);
+  if(m) return m[1];
 
-  match = url.match(/youtu\.be\/([^?]+)/);
-  if (match) return match[1];
+  m = url.match(/youtu\.be\/([^?]+)/);
+  if(m) return m[1];
 
-  match = url.match(/live\/([^?]+)/);
-  if (match) return match[1];
+  m = url.match(/live\/([^?]+)/);
+  if(m) return m[1];
 
   return null;
 }
 
-// 🔥 استخراج ID من @channel/live
-async function getLiveVideoId(channelUrl){
+// 🔥 النسخة القوية
+async function getLiveVideoId(url){
   try{
-    const res = await fetch(channelUrl);
+    const res = await fetch(url);
     const text = await res.text();
 
-    const match = text.match(/"videoId":"(.*?)"/);
+    let match;
+
+    // 1
+    match = text.match(/"videoId":"([^"]+)"/);
+    if(match) return match[1];
+
+    // 2
+    match = text.match(/"canonicalBaseUrl":"\/watch\?v=([^"]+)"/);
+    if(match) return match[1];
+
+    // 3
+    match = text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
     if(match) return match[1];
 
   }catch(e){
-    console.log("Error fetching live page", e);
+    console.log("YT fetch error:", e);
   }
+
   return null;
 }
 
-// ===== Play Stream =====
-async function playStream(url) {
+// ===== PLAY =====
+async function playStream(url){
   const video = document.getElementById("video");
   const iframe = document.getElementById("ytPlayer");
 
-  iframe.style.display = "none";
-  iframe.src = "";
+  iframe.style.display="none";
+  iframe.src="";
 
-  if(hls){ hls.destroy(); hls = null; }
-  if(dashPlayer){ dashPlayer.reset(); dashPlayer = null; }
+  if(hls){hls.destroy();hls=null;}
+  if(dashPlayer){dashPlayer.reset();dashPlayer=null;}
 
-  // ===== YouTube =====
+  // ===== YOUTUBE =====
   if(isYouTube(url)){
-    video.style.display = "none";
-    iframe.style.display = "block";
+    video.style.display="none";
+    iframe.style.display="block";
 
-    let videoId = extractYouTubeID(url);
+    let id = extractYouTubeID(url);
 
-    // @channel/live
-    if(!videoId && url.includes("@")){
-      videoId = await getLiveVideoId(url);
+    if(!id && url.includes("@")){
+      id = await getLiveVideoId(url);
     }
 
-    if(!videoId){
-      alert("Cannot get YouTube video ID");
+    if(!id){
+      alert("No live stream found");
       return;
     }
 
-    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+    iframe.src = "https://www.youtube.com/embed/"+id+"?autoplay=1&mute=1";
     return;
   }
 
   // ===== DASH =====
   if(isDASH(url)){
-    video.style.display = "block";
+    video.style.display="block";
     dashPlayer = dashjs.MediaPlayer().create();
     dashPlayer.initialize(video, url, true);
     return;
   }
 
   // ===== HLS =====
-  video.style.display = "block";
+  video.style.display="block";
   if(Hls.isSupported()){
     hls = new Hls();
     hls.loadSource(url);
     hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, ()=>video.play());
   } else {
     video.src = url;
-    video.play();
   }
 }
 
-// ===== Select Channel =====
-function selectChannel(index) {
-  selectedIndex = index;
+// ===== SELECT =====
+function selectChannel(i){
+  selectedIndex = i;
 
-  const items = document.querySelectorAll("#channels li");
-  items.forEach(item => item.classList.remove("selected"));
+  document.querySelectorAll("#channels li")
+    .forEach(el=>el.classList.remove("selected"));
 
-  const selectedItem = items[index];
-  if(selectedItem){
-    selectedItem.classList.add("selected");
-    selectedItem.scrollIntoView({behavior:"smooth", block:"center"});
-    playStream(allChannels[index].stream);
+  const item = document.querySelectorAll("#channels li")[i];
+  if(item){
+    item.classList.add("selected");
+    playStream(allChannels[i].stream);
   }
 }
 
-// ===== Search =====
-document.getElementById("search").addEventListener("input", function(){
-  const term = this.value.toLowerCase();
-  const filtered = allChannels.filter(c => c.name.toLowerCase().includes(term));
-  displayChannels(filtered);
-});
-
-// ===== Toggle Sidebar =====
-document.getElementById("toggleBtn").onclick = () => {
-  document.getElementById("sidebar").classList.toggle("hidden");
+// ===== SEARCH =====
+document.getElementById("search").oninput = function(){
+  const t = this.value.toLowerCase();
+  displayChannels(allChannels.filter(c=>c.name.toLowerCase().includes(t)));
 };
 
-// ===== Keyboard =====
-document.addEventListener("keydown", (e) => {
-  if(e.key === "ArrowDown"){
-    if(selectedIndex < allChannels.length -1) selectChannel(selectedIndex+1);
-  }
-  if(e.key === "ArrowUp"){
-    if(selectedIndex > 0) selectChannel(selectedIndex-1);
-  }
-});
-
-// Start
+// START
 loadPlaylist();
 </script>
 
