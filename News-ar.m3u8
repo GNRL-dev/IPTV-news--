@@ -51,6 +51,9 @@ https://m.youtube.com/@WataniaReplay/live
 https://www.youtube.com/@Watania2Replay/live
 //https://www.youtube.com/watch?v=EUne0-bLb48 
 
+#EXTINF:-1 tvg-id="" tvg-logo="logo/Alam.png" , العالم الإيرانية
+https://live2.alalam.ir/alalam.m3u8
+
 #EXTINF:-1 tvg-id="MTVLebanon.lb@SD" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/75/Murr_tv.png" ,MTV
 https://shls-live-enc.edgenextcdn.net/out/v1/45ad6fbe1f7149ad9f05f8aefc38f6c0/index.m3u8
 
