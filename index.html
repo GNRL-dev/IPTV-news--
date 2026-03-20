@@ -5,6 +5,7 @@
 <title>Light IPTV Player</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+
 <style>
 body {
   margin:0;
@@ -105,13 +106,13 @@ video, iframe {
 
 <script>
 const playlistUrl = "https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs/heads/main/News-ar.m3u8";
+
 let allChannels = [];
 let hls;
 let dashPlayer = null;
 let selectedIndex = 0;
-let wakeLock = null;
 
-// Load playlist
+// ===== Load Playlist =====
 async function loadPlaylist() {
   const res = await fetch(playlistUrl);
   const text = await res.text();
@@ -124,30 +125,16 @@ async function loadPlaylist() {
       const logoMatch = info.match(/tvg-logo="(.*?)"/);
       const logo = logoMatch ? logoMatch[1] : "";
       const stream = lines[i+1];
+
       allChannels.push({ name, stream, logo });
     }
   }
+
   displayChannels(allChannels);
-  selectChannel(selectedIndex);
+  selectChannel(0);
 }
 
-// Keep screen on
-async function keepScreenOn() {
-  try {
-    wakeLock = await navigator.wakeLock.request("screen");
-    console.log("Screen Wake Lock active");
-  } catch (err) {
-    console.log("Wake Lock error:", err);
-  }
-}
-
-document.addEventListener("visibilitychange", () => {
-  if (wakeLock !== null && document.visibilityState === "visible") {
-    keepScreenOn();
-  }
-});
-
-// Display channels
+// ===== Display Channels =====
 function displayChannels(list) {
   const ul = document.getElementById("channels");
   ul.innerHTML = "";
@@ -156,14 +143,12 @@ function displayChannels(list) {
     const li = document.createElement("li");
     li.dataset.index = index;
 
-    // Number
     const num = document.createElement("span");
     num.textContent = (index+1) + ".";
     num.style.width = "24px";
     num.style.fontWeight = "bold";
     li.appendChild(num);
 
-    // Logo (always first)
     if(ch.logo){
       const img = document.createElement("img");
       img.src = ch.logo;
@@ -171,7 +156,6 @@ function displayChannels(list) {
       li.appendChild(img);
     }
 
-    // Name
     const name = document.createElement("span");
     name.textContent = ch.name;
     name.style.flex = "1";
@@ -182,49 +166,76 @@ function displayChannels(list) {
   });
 }
 
-// Detect YouTube and DASH
+// ===== Helpers =====
 function isYouTube(url) {
   return url.includes("youtube.com") || url.includes("youtu.be");
-}
-
-function extractYouTubeID(url) {
-  const regExp = /(?:youtube\.com\/(?:live\/|watch\?v=)|youtu\.be\/)([^&\n?#]+)/;
-  const match = url.match(regExp);
-  return match ? match[1] : null;
 }
 
 function isDASH(url){
   return url.endsWith(".mpd");
 }
 
-// Play stream
-function playStream(url) {
+function extractYouTubeID(url) {
+  let match = url.match(/v=([^&]+)/);
+  if (match) return match[1];
+
+  match = url.match(/youtu\.be\/([^?]+)/);
+  if (match) return match[1];
+
+  match = url.match(/live\/([^?]+)/);
+  if (match) return match[1];
+
+  return null;
+}
+
+// 🔥 استخراج ID من @channel/live
+async function getLiveVideoId(channelUrl){
+  try{
+    const res = await fetch(channelUrl);
+    const text = await res.text();
+
+    const match = text.match(/"videoId":"(.*?)"/);
+    if(match) return match[1];
+
+  }catch(e){
+    console.log("Error fetching live page", e);
+  }
+  return null;
+}
+
+// ===== Play Stream =====
+async function playStream(url) {
   const video = document.getElementById("video");
   const iframe = document.getElementById("ytPlayer");
 
-  // Hide iframe by default
   iframe.style.display = "none";
   iframe.src = "";
 
-  // Destroy HLS
   if(hls){ hls.destroy(); hls = null; }
-  // Destroy DASH
   if(dashPlayer){ dashPlayer.reset(); dashPlayer = null; }
 
-  // YouTube
+  // ===== YouTube =====
   if(isYouTube(url)){
-    const videoId = extractYouTubeID(url);
-    if(!videoId){
-      alert("Invalid YouTube link");
-      return;
-    }
     video.style.display = "none";
     iframe.style.display = "block";
-    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+
+    let videoId = extractYouTubeID(url);
+
+    // @channel/live
+    if(!videoId && url.includes("@")){
+      videoId = await getLiveVideoId(url);
+    }
+
+    if(!videoId){
+      alert("Cannot get YouTube video ID");
+      return;
+    }
+
+    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
     return;
   }
 
-  // DASH
+  // ===== DASH =====
   if(isDASH(url)){
     video.style.display = "block";
     dashPlayer = dashjs.MediaPlayer().create();
@@ -232,7 +243,7 @@ function playStream(url) {
     return;
   }
 
-  // HLS
+  // ===== HLS =====
   video.style.display = "block";
   if(Hls.isSupported()){
     hls = new Hls();
@@ -245,11 +256,13 @@ function playStream(url) {
   }
 }
 
-// Highlight selected channel
+// ===== Select Channel =====
 function selectChannel(index) {
   selectedIndex = index;
+
   const items = document.querySelectorAll("#channels li");
   items.forEach(item => item.classList.remove("selected"));
+
   const selectedItem = items[index];
   if(selectedItem){
     selectedItem.classList.add("selected");
@@ -258,19 +271,19 @@ function selectChannel(index) {
   }
 }
 
-// Search
+// ===== Search =====
 document.getElementById("search").addEventListener("input", function(){
   const term = this.value.toLowerCase();
   const filtered = allChannels.filter(c => c.name.toLowerCase().includes(term));
   displayChannels(filtered);
 });
 
-// Toggle sidebar
+// ===== Toggle Sidebar =====
 document.getElementById("toggleBtn").onclick = () => {
   document.getElementById("sidebar").classList.toggle("hidden");
 };
 
-// Arrow key navigation
+// ===== Keyboard =====
 document.addEventListener("keydown", (e) => {
   if(e.key === "ArrowDown"){
     if(selectedIndex < allChannels.length -1) selectChannel(selectedIndex+1);
@@ -280,6 +293,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// Start
 loadPlaylist();
 </script>
 
