@@ -62,9 +62,4 @@ https://shls-live-enc.edgenextcdn.net/out/v1/45ad6fbe1f7149ad9f05f8aefc38f6c0/in
 #EXTINF:-1 tvg-id="" tvg-logo="logo/Assadissa.png", السادسة
 https://stream-lb.livemediama.com/assadissa/hls/stream_0/playlist.m3u8
 
-//#EXTINF:-1 tvg-id="MBC3USA.us@SD" tvg-logo="https://i.imgur.com/PVt8OPN.png" group-title="Kids",MBC 3
-//https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-3-usa/5d58265a862a476dc7f97694addb5ded/index.m3u8
-
-//#EXTINF:-1 tvg-id="" tvg-logo="https://raw.githubusercontent.com/GNRL-dev/IPTV-news--/refs/heads/main/logo/natgeo.svg", Nat Geo Abu dhabi
-//https://ev-fuj-dxb-cdn-edge2.aws.playco.com/live/eds/NatGeo_AbuDhabi_HD/DASH/NatGeo_AbuDhabi_HD.mpd
 
